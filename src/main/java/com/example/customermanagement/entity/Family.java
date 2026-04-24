@@ -17,8 +17,6 @@ public class Family {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String relation;
-
     private Long customerId;
     private Long familyMemberId;
 

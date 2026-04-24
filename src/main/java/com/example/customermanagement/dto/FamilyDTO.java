@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class FamilyDTO {
-    private Long familyCustomerId;
-    private String relation;
+    private Long customerId;
+    private Long familyMemberId;
 }
