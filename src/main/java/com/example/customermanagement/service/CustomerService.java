@@ -2,7 +2,12 @@ package com.example.customermanagement.service;
 
 import com.example.customermanagement.dto.CustomerDTO;
 
+import java.util.List;
+
 public interface CustomerService {
     CustomerDTO createCustomer(CustomerDTO dto);
-  //  public void addFamily(Long customerId, AddFamilyRequestDTO dto);
+    CustomerDTO getCustomer(Long id);
+    List<CustomerDTO> getAllCustomers();
+
+    CustomerDTO updateCustomer(Long id, CustomerDTO dto);
 }

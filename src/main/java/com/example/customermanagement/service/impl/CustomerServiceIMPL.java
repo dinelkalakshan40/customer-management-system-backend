@@ -65,5 +65,40 @@ public class CustomerServiceIMPL implements CustomerService {
         dto.setId(saved.getId());
         return dto;
     }
+    @Override
+    public CustomerDTO getCustomer(Long id) {
+        Customer c = customerRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
+        CustomerDTO dto = new CustomerDTO();
+        dto.setId(c.getId());
+        dto.setName(c.getName());
+        dto.setDob(c.getDob());
+        dto.setNic(c.getNic());
+
+        return dto;
+    }
+    @Override
+    public List<CustomerDTO> getAllCustomers() {
+        return customerRepo.findAll().stream().map(c -> {
+            CustomerDTO dto = new CustomerDTO();
+            dto.setId(c.getId());
+            dto.setName(c.getName());
+            dto.setNic(c.getNic());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+    @Override
+    public CustomerDTO updateCustomer(Long id, CustomerDTO dto) {
+
+        Customer customer = customerRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
+        customer.setName(dto.getName());
+        customer.setDob(dto.getDob());
+
+        customerRepo.save(customer);
+        return dto;
+    }
 
 }

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/customers")
 @CrossOrigin
@@ -18,6 +20,19 @@ public class Controller {
     @PostMapping
     public ResponseEntity<CustomerDTO> create(@RequestBody CustomerDTO dto) {
         return ResponseEntity.ok(service.createCustomer(dto));
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerDTO> get(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getCustomer(id));
+    }
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> getAll() {
+        return ResponseEntity.ok(service.getAllCustomers());
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerDTO> update(@PathVariable Long id,
+                                              @RequestBody CustomerDTO dto) {
+        return ResponseEntity.ok(service.updateCustomer(id, dto));
     }
 
 }
