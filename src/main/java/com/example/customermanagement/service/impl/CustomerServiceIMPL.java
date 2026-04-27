@@ -83,6 +83,23 @@ public class CustomerServiceIMPL implements CustomerService {
             dto.setId(c.getId());
             dto.setName(c.getName());
             dto.setNic(c.getNic());
+            dto.setDob(c.getDob());
+            if (c.getMobiles() != null) {
+                dto.setMobiles(
+                        c.getMobiles().stream()
+                                .map(Mobile::getMobile)
+                                .collect(Collectors.toList())
+                );
+            }
+
+            // If you have address entity
+//            if (c.getAddresses() != null) {
+//                dto.setAddresses(
+//                        c.getAddresses().stream()
+//                                .map(Address::g)
+//                                .collect(Collectors.toList())
+//                );
+//            }
             return dto;
         }).collect(Collectors.toList());
     }
