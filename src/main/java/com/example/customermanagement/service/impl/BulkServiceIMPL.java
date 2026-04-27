@@ -18,8 +18,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static javax.swing.UIManager.getString;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -56,7 +54,7 @@ public class BulkServiceIMPL  implements BulkService {
                     // NAME
                     customer.setName(getString(row.getCell(0)));
 
-                    // DOB 
+                    // DOB
                     customer.setDob(parseDate(row.getCell(1)));
 
                     // NIC
@@ -67,7 +65,6 @@ public class BulkServiceIMPL  implements BulkService {
                     if (nic != null && customerRepo.existsByNic(nic)) {
                         continue;
                     }
-
 
                     List<Mobile> mobiles = new ArrayList<>();
 
@@ -136,6 +133,105 @@ public class BulkServiceIMPL  implements BulkService {
                 throw new RuntimeException("Excel processing failed: " + e.getMessage(), e);
             }
     }
+
+    @Override
+    public void updateProcessExcel(MultipartFile file) {
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Map<Long, City> cityCache = cityRepo.findAll()
+                    .stream()
+                    .collect(Collectors.toMap(City::getId, c -> c));
+
+            Map<Long, Country> countryCache = countryRepo.findAll()
+                    .stream()
+                    .collect(Collectors.toMap(Country::getId, c -> c));
+
+            for (Row row : sheet) {
+
+                if (row.getRowNum() == 0) continue;
+
+                String nic = getString(row.getCell(2));
+
+                if (nic == null || nic.isEmpty()) {
+                    System.out.println("Skipping row: missing NIC");
+                    continue;
+                }
+
+                Customer customer = customerRepo.findByNic(nic).orElse(null);
+
+                if (customer == null) {
+                    System.out.println("Customer not found for NIC: " + nic);
+                    continue;
+                }
+
+                customer.setName(getString(row.getCell(0)));
+                customer.setDob(parseDate(row.getCell(1)));
+                customer.setNic(nic);
+
+                List<Mobile> mobilesList = new ArrayList<>();
+
+                String mobile1 = getString(row.getCell(3));
+                String mobile2 = getString(row.getCell(4));
+
+                if (mobile1 != null && !mobile1.isEmpty()) {
+                    Mobile m = new Mobile();
+                    m.setMobile(mobile1);
+                    m.setCustomer(customer);
+                    mobilesList.add(m);
+                }
+
+                if (mobile2 != null && !mobile2.isEmpty()) {
+                    Mobile m = new Mobile();
+                    m.setMobile(mobile2);
+                    m.setCustomer(customer);
+                    mobilesList.add(m);
+                }
+
+                customer.setMobiles(mobilesList);
+
+                // ADDRESS UPDATE EXISTING
+                Address address;
+
+                if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+                    address = customer.getAddresses().get(0);
+                } else {
+                    address = new Address();
+                }
+
+                address.setLine1(getString(row.getCell(5)));
+                address.setLine2(getString(row.getCell(6)));
+
+                Long cityId = parseLongSafe(row.getCell(7));
+                Long countryId = parseLongSafe(row.getCell(8));
+
+                City city = cityCache.get(cityId);
+                Country country = countryCache.get(countryId);
+
+                if (city == null || country == null) {
+                    System.out.println("Invalid city/country → skipping ID: " + nic);
+                    continue;
+                }
+
+                address.setCity(city);
+                address.setCountry(country);
+                address.setCustomer(customer);
+
+                List<Address> addresses = new ArrayList<>();
+                addresses.add(address);
+
+                customer.setAddresses(addresses);
+
+                // SAVE UPDATE
+                customerRepo.save(customer);
+                System.out.println("Updated Customer ID: " + nic);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Bulk update failed: " + e.getMessage(), e);
+        }
+    }
+
     // STRING READER
     private String getString(Cell cell) {
         if (cell == null) return null;

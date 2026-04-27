@@ -4,4 +4,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface BulkService {
     void processExcel(MultipartFile file);
+    void updateProcessExcel(MultipartFile file);
 }
