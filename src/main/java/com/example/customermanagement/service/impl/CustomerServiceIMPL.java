@@ -112,6 +112,17 @@ public class CustomerServiceIMPL implements CustomerService {
         customer.setName(dto.getName());
         customer.setDob(dto.getDob());
 
+
+        customer.getMobiles().clear();
+        if (dto.getMobiles() != null) {
+            dto.getMobiles().forEach(num -> {
+                Mobile mobile = new Mobile();
+                mobile.setMobile(num);
+                mobile.setCustomer(customer);
+                customer.getMobiles().add(mobile);
+            });
+        }
+
         customerRepo.save(customer);
         return dto;
     }

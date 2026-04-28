@@ -28,8 +28,11 @@ public class BulkServiceIMPL  implements BulkService {
     private static final int BATCH_SIZE = 1000;
 
     @Override
-    public void processExcel(MultipartFile file) {
+    public Map<String, Object> processExcel(MultipartFile file) {
 
+        Map<String, Object> response = new HashMap<>();
+        List<String> errors = new ArrayList<>();
+        int successCount = 0;
             try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
 
                 Sheet sheet = workbook.getSheetAt(0);
@@ -132,6 +135,10 @@ public class BulkServiceIMPL  implements BulkService {
             } catch (Exception e) {
                 throw new RuntimeException("Excel processing failed: " + e.getMessage(), e);
             }
+        response.put("success",successCount);
+        response.put("errors", errors);
+
+        return response;
     }
 
     @Override

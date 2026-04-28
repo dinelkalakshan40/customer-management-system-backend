@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/family")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class FamilyController {
     private final FamilyService service;
